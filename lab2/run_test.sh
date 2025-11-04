@@ -1,114 +1,81 @@
 #!/bin/bash
-# ===========================================
-# 多版本程序性能测试脚本
-# 作者：ChatGPT（优化版）
-# ===========================================
+# ==========================================
+# 实验二：多进程/多线程文件读取与排序 自动测试脚本
+# 环境：Ubuntu / WSL，gcc/g++ >= 9.4，支持 C++17
+# ==========================================
 
-# ====== 1. 初始化阶段 ======
-set -e
-mkdir -p data_files
-RESULT_LOG="result.log"
-rm -f $RESULT_LOG
-
-# ====== 2. 测试参数配置 ======
-# 数据集大小（自动从1M到4G）
-sizes=("1M" "10M" "100M" "1G" "2G" "3G" "4G")
-
-# 线程/进程参数（可按实际代码调整）
+# ==== 参数设置 ====
+DATA_DIR="./data_files"
+LOG="./result.log"
 THREADS=4
 PROCS=4
+SIZES=("1M" "10M" "100M" "1G" "2G")
 
-# 随机数据 or 零数据
-USE_RANDOM=true    # 改为 false 则使用 /dev/zero（生成更快）
+# ==== 初始化 ====
+mkdir -p "$DATA_DIR"
+echo "========== 编译阶段 ==========" | tee "$LOG"
 
-# ====== 3. 编译阶段 ======
-echo "========== 编译阶段 ==========" | tee -a $RESULT_LOG
+echo "正在编译 single.cpp ..."
+g++ -std=c++17 -O2 single.cpp -o single
 
-compile_cpp() {
-    src="$1.cpp"
-    exe="$1"
-    echo "正在编译 $src ..."
-    g++ -std=c++17 -O2 -pthread -o "$exe" "$src"
-}
+echo "正在编译 thread.cpp ..."
+g++ -std=c++17 -O2 -pthread thread.cpp -o thread
 
-compile_cpp single
-compile_cpp thread
-compile_cpp proc
+echo "正在编译 proc.cpp ..."
+g++ -std=c++17 -O2 proc.cpp -o proc
 
-# ====== 4. 数据文件生成阶段 ======
-echo "========== 数据文件生成阶段 ==========" | tee -a $RESULT_LOG
-
-for size in "${sizes[@]}"; do
-    file="data_files/data_${size}.bin"
-
+# ==== 数据文件生成 ====
+echo "========== 数据文件生成阶段 ==========" | tee -a "$LOG"
+for size in "${SIZES[@]}"; do
+    file="$DATA_DIR/data_${size}.bin"
     if [ ! -f "$file" ]; then
         echo "生成 $file ..."
-        case "$size" in
-            *M)
-                bs=1M
-                count=${size%M}
-                ;;
-            *G)
-                bs=1G
-                count=${size%G}
-                ;;
-            *)
-                echo "未知单位：$size"
-                exit 1
-                ;;
-        esac
-
-        if [ "$USE_RANDOM" = true ]; then
-            dd if=/dev/urandom of="$file" bs=$bs count=$count status=progress
-        else
-            dd if=/dev/zero of="$file" bs=$bs count=$count status=progress
-        fi
+        dd if=/dev/urandom of="$file" bs=$size count=1 status=progress
     else
         echo "$file 已存在，跳过生成。"
     fi
 done
 
-# ====== 5. 性能测试阶段 ======
-echo "========== 性能测试阶段 ==========" | tee -a $RESULT_LOG
-
-# 检查 time 命令路径
-if command -v /usr/bin/time >/dev/null 2>&1; then
-    TIME_CMD="/usr/bin/time -f '%E'"
-elif command -v time >/dev/null 2>&1; then
-    TIME_CMD="time -p"
-else
-    echo "未找到 time 命令，请安装（Debian/Ubuntu: apt install time）"
-    exit 1
-fi
-
+# ==== 测试函数 ====
 run_test() {
-    prog=$1
-    echo -e "\n---- 测试程序：$prog ----" | tee -a $RESULT_LOG
+    exe=$1
+    shift
+    echo "---- 测试程序：$exe ----" | tee -a "$LOG"
+    for size in "${SIZES[@]}"; do
+        file="$DATA_DIR/data_${size}.bin"
+        if [ ! -f "$file" ]; then
+            echo "❌ 文件 $file 不存在，跳过。" | tee -a "$LOG"
+            continue
+        fi
 
-    for size in "${sizes[@]}"; do
-        file="data_files/data_${size}.bin"
-        echo "[${file}] 正在测试..." | tee -a $RESULT_LOG
+        # 获取文件大小（字节），计算整型元素个数
+        bytes=$(stat -c%s "$file")
+        total_items=$((bytes / 4))
+        echo "[data_${size}.bin]" | tee -a "$LOG"
 
-        case $prog in
+        start=$(date +%s.%N)
+
+        case $exe in
             single)
-                $TIME_CMD ./$prog "$file" "output_${prog}_${size}.txt" 2>&1 | tee -a $RESULT_LOG
-                ;;
+                ./single "$file" "output_${size}_single.txt" ;;
             thread)
-                # total_items 根据大小估算（1字节1项，仅作演示）
-                $TIME_CMD ./$prog "$file" $THREADS 1000000 2>&1 | tee -a $RESULT_LOG
-                ;;
+                ./thread "$file" $THREADS $total_items "output_${size}_thread.txt" ;;
             proc)
-                $TIME_CMD ./$prog "$file" $PROCS 1000000 2>&1 | tee -a $RESULT_LOG
-                ;;
+                ./proc "$file" $PROCS $total_items "output_${size}_proc.txt" ;;
         esac
 
-        echo "" >> $RESULT_LOG
+        end=$(date +%s.%N)
+        runtime=$(awk -v s=$start -v e=$end 'BEGIN {printf "%.2f", e - s}')
+        echo "耗时: $runtime 秒" | tee -a "$LOG"
     done
+    echo "" | tee -a "$LOG"
 }
 
-run_test single
-run_test thread
-run_test proc
+# ==== 性能测试 ====
+echo "========== 性能测试阶段 ==========" | tee -a "$LOG"
+run_test "single"
+run_test "thread"
+run_test "proc"
 
-echo "========== 测试完成 ==========" | tee -a $RESULT_LOG
-echo "所有结果已保存到：$RESULT_LOG"
+echo "========== 测试完成 ==========" | tee -a "$LOG"
+echo "结果已保存到 $LOG"

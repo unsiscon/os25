@@ -1,94 +1,40 @@
 ========== 编译阶段 ==========
 ========== 数据文件生成阶段 ==========
 ========== 性能测试阶段 ==========
-
 ---- 测试程序：single ----
-[data_files/data_1M.bin] 正在测试...
-Read: 262144 items, sort 0.019 s, output 0.026 s
-'0:00.04'
-
-[data_files/data_10M.bin] 正在测试...
-Read: 2621440 items, sort 0.227 s, output 0.255 s
-'0:00.51'
-
-[data_files/data_100M.bin] 正在测试...
-Read: 26214400 items, sort 2.555 s, output 2.639 s
-'0:05.43'
-
-[data_files/data_1G.bin] 正在测试...
-Read: 268435456 items, sort 30.122 s, output 26.528 s
-'0:59.25'
-
-[data_files/data_2G.bin] 正在测试...
-Read: 536870912 items, sort 62.321 s, output 51.638 s
-'1:59.67'
-
-[data_files/data_3G.bin] 正在测试...
-Read: 805306368 items, sort 96.379 s, output 76.908 s
-'3:01.38'
-
-[data_files/data_4G.bin] 正在测试...
-Command terminated by signal 9
-'0:02.36'
-
+[data_1M.bin]
+耗时: 0.10 秒
+[data_10M.bin]
+耗时: 0.55 秒
+[data_100M.bin]
+耗时: 5.30 秒
+[data_1G.bin]
+耗时: 58.95 秒
+[data_2G.bin]
+耗时: 118.75 秒
 
 ---- 测试程序：thread ----
-[data_files/data_1M.bin] 正在测试...
-Merged result in data_files/data_1M.bin.thread.result.txt
-'0:00.07'
-
-[data_files/data_10M.bin] 正在测试...
-Merged result in data_files/data_10M.bin.thread.result.txt
-'0:00.18'
-
-[data_files/data_100M.bin] 正在测试...
-Merged result in data_files/data_100M.bin.thread.result.txt
-'0:00.19'
-
-[data_files/data_1G.bin] 正在测试...
-Merged result in data_files/data_1G.bin.thread.result.txt
-'0:00.18'
-
-[data_files/data_2G.bin] 正在测试...
-Merged result in data_files/data_2G.bin.thread.result.txt
-'0:00.19'
-
-[data_files/data_3G.bin] 正在测试...
-Merged result in data_files/data_3G.bin.thread.result.txt
-'0:00.18'
-
-[data_files/data_4G.bin] 正在测试...
-Merged result in data_files/data_4G.bin.thread.result.txt
-'0:00.19'
-
+[data_1M.bin]
+耗时: 0.06 秒
+[data_10M.bin]
+耗时: 0.46 秒
+[data_100M.bin]
+耗时: 5.18 秒
+[data_1G.bin]
+耗时: 51.95 秒
+[data_2G.bin]
+耗时: 101.81 秒
 
 ---- 测试程序：proc ----
-[data_files/data_1M.bin] 正在测试...
-Merged result in data_files/data_1M.bin.proc.result.txt
-'0:00.06'
-
-[data_files/data_10M.bin] 正在测试...
-Merged result in data_files/data_10M.bin.proc.result.txt
-'0:00.17'
-
-[data_files/data_100M.bin] 正在测试...
-Merged result in data_files/data_100M.bin.proc.result.txt
-'0:00.17'
-
-[data_files/data_1G.bin] 正在测试...
-Merged result in data_files/data_1G.bin.proc.result.txt
-'0:00.16'
-
-[data_files/data_2G.bin] 正在测试...
-Merged result in data_files/data_2G.bin.proc.result.txt
-'0:00.18'
-
-[data_files/data_3G.bin] 正在测试...
-Merged result in data_files/data_3G.bin.proc.result.txt
-'0:00.18'
-
-[data_files/data_4G.bin] 正在测试...
-Merged result in data_files/data_4G.bin.proc.result.txt
-'0:00.17'
+[data_1M.bin]
+耗时: 0.08 秒
+[data_10M.bin]
+耗时: 0.52 秒
+[data_100M.bin]
+耗时: 4.57 秒
+[data_1G.bin]
+耗时: 51.47 秒
+[data_2G.bin]
+耗时: 101.46 秒
 
 ========== 测试完成 ==========
