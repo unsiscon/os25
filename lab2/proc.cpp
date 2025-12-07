@@ -1,10 +1,8 @@
-// proc_sort.cpp
 #include <bits/stdc++.h>
 #include <sys/wait.h>
 #include <unistd.h>
 using namespace std;
 using u32 = uint32_t;
-
 void child_work(const string &infile, size_t offset, size_t cnt, const string &tmp){
     FILE* f = fopen(infile.c_str(),"rb");
     if(!f){ perror("fopen"); exit(1); }
@@ -19,7 +17,6 @@ void child_work(const string &infile, size_t offset, size_t cnt, const string &t
     fclose(out);
     exit(0);
 }
-
 int main(int argc,char**argv){
     if(argc<4){ cerr<<"Usage: "<<argv[0]<<" <input> <procs> <total_items>\n"; return 1; }
     string infile = argv[1];
@@ -43,8 +40,6 @@ int main(int argc,char**argv){
         offset += cnt;
     }
     for(int i=0;i<procs;++i) wait(NULL);
-
-    // 合并：重用同样的 k-way merge 思路，输出 runs 文本
     string outname = infile + ".proc.result.txt";
     FILE* out = fopen(outname.c_str(),"w");
     struct R{ FILE* f; u32 cur; bool has; };
